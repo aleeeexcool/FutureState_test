@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rimraf ./artifacts ./cache ./coverage ./types ./coverage.json ./typechain-types",
+    "compile": "hardhat compile",
+    "test": "hardhat test"
   },
   "repository": {
     "type": "git",
