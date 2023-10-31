@@ -32,25 +32,6 @@ contract ProposalEvaluation {
         _;
     }
 
-    modifier evaluationEnded() {
-        if(block.timestamp > evaluationEndTime) {
-            revert EvaluationPeriodHasEnded({
-                endTime: evaluationEndTime,
-                currentTime: block.timestamp
-            });
-        }
-        _;
-    }
-
-    modifier evaluationInProgress() {
-        if(block.timestamp <= evaluationEndTime) {
-            revert EvaluationPriodIsStillInProgress({
-                endTime: evaluationEndTime
-            });
-        }
-        _;
-    }
-
     constructor(address[] memory _judges) {
         if(_judges.length <= 2) {
             revert MoreJudgesNeeded({
@@ -62,14 +43,26 @@ contract ProposalEvaluation {
         proposalCount = 0;
     }
 
-    function startEvaluation() external onlyJudge evaluationInProgress {
+    function startEvaluation() external onlyJudge {
+        if(block.timestamp <= evaluationEndTime) {
+            revert EvaluationPriodIsStillInProgress({
+                endTime: evaluationEndTime
+            });
+        }
+
         proposalCount++;
         evaluationEndTime = block.timestamp + TIME_FOR_EVALUATION;
 
         emit EvaluationStarted(evaluationEndTime);
     }
 
-    function submitScore(uint8 score) external onlyJudge evaluationEnded {
+    function submitScore(uint8 score) external onlyJudge {
+        if(block.timestamp > evaluationEndTime) {
+            revert EvaluationPeriodHasEnded({
+                endTime: evaluationEndTime,
+                currentTime: block.timestamp
+            });
+        }
         if(proposals[proposalCount].hasEvaluated[msg.sender]) revert HaveAlreadyEvaluated();
         if(score > 10) {
             revert NotCorrectScore({
@@ -111,6 +104,7 @@ contract ProposalEvaluation {
                 return true;
             }
         }
+
         return false;
     }
 
