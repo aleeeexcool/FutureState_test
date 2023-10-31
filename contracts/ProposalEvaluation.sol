@@ -28,9 +28,7 @@ contract ProposalEvaluation {
     error ProposalHasNotBeenEvatuatedYet(uint256 currentCount);
 
     modifier onlyJudge() {
-        if(!isJudge(msg.sender)) {
-            revert NotAJudge();
-        }
+        if(!isJudge(msg.sender)) revert NotAJudge();
         _;
     }
 
@@ -72,9 +70,7 @@ contract ProposalEvaluation {
     }
 
     function submitScore(uint8 score) external onlyJudge evaluationEnded {
-        if(proposals[proposalCount].hasEvaluated[msg.sender]) {
-            revert HaveAlreadyEvaluated();
-        }
+        if(proposals[proposalCount].hasEvaluated[msg.sender]) revert HaveAlreadyEvaluated();
         if(score > 10) {
             revert NotCorrectScore({
                 current: score,
@@ -89,21 +85,14 @@ contract ProposalEvaluation {
     }
 
     function getAverageScore(uint256 proposalId) external view returns (uint) {
-        if(proposalId > proposalCount) {
-            revert ProposalHasNotBeenEvatuatedYet({
-                currentCount: proposalCount
-            });
-        } else if(proposalId == proposalCount) {
-            if(block.timestamp <= evaluationEndTime) {
-                revert EvaluationPriodIsStillInProgress({
-                    endTime: evaluationEndTime
-                });
-            } else {
-                return proposals[proposalId].totalScore / judges.length;
-            }
-        } else {
-            return proposals[proposalId].totalScore / judges.length;
+        if (proposalId > proposalCount) {
+            revert ProposalHasNotBeenEvatuatedYet({currentCount: proposalCount});
         }
+        if (proposalId == proposalCount && block.timestamp <= evaluationEndTime) {
+            revert EvaluationPriodIsStillInProgress({endTime: evaluationEndTime});
+        }
+
+        return proposals[proposalId].totalScore / judges.length;
     }
 
     function getMyScore(uint256 proposalId) external view onlyJudge returns (uint8) {
