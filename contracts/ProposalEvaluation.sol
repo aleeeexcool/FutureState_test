@@ -95,15 +95,15 @@ contract ProposalEvaluation {
             });
         } else if(proposalId == proposalCount) {
             if(block.timestamp <= evaluationEndTime) {
-                    revert EvaluationPriodIsStillInProgress({
-                        endTime: evaluationEndTime
-                    });
-                } else {
-                    return proposals[proposalId].totalScore / judges.length;
-                }
+                revert EvaluationPriodIsStillInProgress({
+                    endTime: evaluationEndTime
+                });
             } else {
                 return proposals[proposalId].totalScore / judges.length;
             }
+        } else {
+            return proposals[proposalId].totalScore / judges.length;
+        }
     }
 
     function getMyScore(uint256 proposalId) external view onlyJudge returns (uint8) {
